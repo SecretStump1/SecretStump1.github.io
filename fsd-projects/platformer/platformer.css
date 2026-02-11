@@ -1,10 +1,11 @@
 body {
-  margin: 0px;
+  margin: 100px;
 }
 
 canvas {
-  background-color: lightblue;
-  margin: 20px;
+  background-image: url('https://c4.wallpaperflare.com/wallpaper/72/340/1016/minecraft-render-screenshots-wallpaper-preview.jpg');
+  margin: 0px;
+  background-size: cover;
 }
 
 img {
