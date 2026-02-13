@@ -1,17 +1,17 @@
 {
-  "duck": {
-    "coordinates": [
-      {
+    "duck": {
+        "coordinates": [
+              {
         "sx": 0,
-        "sy": 0,
+       "sy": 0,
         "width": 70,
-        "height": 113,
+       "height": 113,
         "hitWidth": 50,
-        "hitHeight": 105,
+       "hitHeight": 105,
         "hitDx": 17,
-        "hitDy": 6,
-        "xoffset": 15,
-        "yoffset": 7
+       "hitDy": 6,
+       "xoffset": 15,
+      "yoffset": 7
       },
       {
         "sx": 71,

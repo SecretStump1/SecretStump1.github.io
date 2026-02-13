@@ -1,12 +1,17 @@
 body {
-  margin: 100px;
+  margin: 0px;
+  overflow: hidden;
 }
+
 
 canvas {
   background-image: url('https://c4.wallpaperflare.com/wallpaper/72/340/1016/minecraft-render-screenshots-wallpaper-preview.jpg');
-  margin: 0px;
+  margin: 0;
   background-size: cover;
+  width: 100%;
+  height: 100%;
 }
+
 
 img {
   display: none;
