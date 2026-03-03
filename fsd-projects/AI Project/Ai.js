@@ -78,8 +78,8 @@ function nextRound() {
     // Pick a random monster type
     const type = monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
     
-    // Set boss every 5 rounds
-    if (enemyLevel % 5 === 0) {
+    // Set boss every 7 rounds
+    if (enemyLevel % 7 === 0) {
         enemy = {
             name: "DRAGON BOSS",
             hp: Math.floor(200 + (enemyLevel * 20)),

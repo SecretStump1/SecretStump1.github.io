@@ -1,368 +1,881 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RPG Arena: Level Up Edition</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
-        
-        /* Screens */
-        #home-screen, #battle-screen, #shop-screen, #weapon-screen, #game-over-screen { 
-            width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; transition: 0.5s; 
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #1a1a1a;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      /* Screens */
+      #home-screen,
+      #battle-screen,
+      #shop-screen,
+      #weapon-screen,
+      #game-over-screen {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 0;
+        left: 0;
+        transition: 0.5s;
+      }
+      .hidden {
+        display: none !important;
+      }
+
+      /* UI Elements */
+      .slayer-counter {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 10px 20px;
+        border-radius: 10px;
+        border: 1px solid #e74c3c;
+        color: #ff4757;
+        font-weight: bold;
+        font-family: monospace;
+        z-index: 5;
+      }
+      .level-badge {
+        background: #f1c40f;
+        color: black;
+        padding: 2px 8px;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: inline-block;
+      }
+      .battle-arena {
+        display: flex;
+        gap: 40px;
+        margin-bottom: 20px;
+      }
+      .character {
+        text-align: center;
+        width: 200px;
+        padding: 25px;
+        background: #2c3e50;
+        border-radius: 15px;
+        border: 3px solid #34495e;
+        transition: 0.1s;
+      }
+      .sprite {
+        font-size: 80px;
+        display: block;
+        margin-bottom: 10px;
+        animation: float 3s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
         }
-        .hidden { display: none !important; }
+        50% {
+          transform: translateY(-15px);
+        }
+      }
 
-        /* UI Elements */
-        .slayer-counter { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); padding: 10px 20px; border-radius: 10px; border: 1px solid #e74c3c; color: #ff4757; font-weight: bold; font-family: monospace; z-index: 5; }
-        .level-badge { background: #f1c40f; color: black; padding: 2px 8px; border-radius: 5px; font-size: 12px; font-weight: bold; margin-bottom: 5px; display: inline-block; }
-        .battle-arena { display: flex; gap: 40px; margin-bottom: 20px; }
-        .character { text-align: center; width: 200px; padding: 25px; background: #2c3e50; border-radius: 15px; border: 3px solid #34495e; transition: 0.1s; }
-        .sprite { font-size: 80px; display: block; margin-bottom: 10px; animation: float 3s ease-in-out infinite; }
-        
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-        
-        .hp-bar-container { background: #444; border: 2px solid #fff; height: 20px; width: 100%; margin-top: 10px; border-radius: 10px; overflow: hidden; }
-        .hp-fill { background: #2ecc71; height: 100%; width: 100%; transition: width 0.3s ease; }
-        
-        .log { background: #000; padding: 15px; width: 500px; height: 100px; overflow-y: auto; border: 1px solid #555; font-family: monospace; font-size: 14px; margin-bottom: 20px; border-radius: 5px; }
-        .controls { display: flex; gap: 15px; }
-        
-        /* Menus */
-        .menu-container { background: #2d3436; padding: 40px; border-radius: 20px; border: 4px solid gold; text-align: center; width: 400px; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
-        
-        /* Leaderboard */
-        .leaderboard { margin-top: 20px; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; width: 100%; box-sizing: border-box; font-family: monospace; }
-        .leaderboard-entry { display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 8px 0; font-size: 14px; }
-        
-        input[type="text"] { padding: 12px; border-radius: 5px; border: none; margin-bottom: 15px; width: 80%; text-align: center; font-size: 16px; background: #eee; }
+      .hp-bar-container {
+        background: #444;
+        border: 2px solid #fff;
+        height: 20px;
+        width: 100%;
+        margin-top: 10px;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .hp-fill {
+        background: #2ecc71;
+        height: 100%;
+        width: 100%;
+        transition: width 0.3s ease;
+      }
 
-        button { padding: 15px 30px; font-weight: bold; cursor: pointer; border: none; border-radius: 8px; background: #e74c3c; color: white; transition: 0.2s; font-size: 16px; margin: 5px; }
-        button:hover { transform: scale(1.05); filter: brightness(1.2); }
-        button:disabled { background: #555 !important; cursor: not-allowed; }
+      .log {
+        background: #000;
+        padding: 15px;
+        width: 500px;
+        height: 100px;
+        overflow-y: auto;
+        border: 1px solid #555;
+        font-family: monospace;
+        font-size: 14px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+      }
+      .controls {
+        display: flex;
+        gap: 15px;
+      }
 
-        /* Animations */
-        .shake { animation: shake 0.4s; }
-        .crit-shake { animation: shake 0.2s 2; filter: brightness(2); }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-15px); } 75% { transform: translateX(15px); } }
-   /* Button Click Animation */
-button:active {
-    transform: scale(0.92); /* Shrinks slightly */
-    filter: brightness(0.8); /* Darkens slightly */
-    box-shadow: inset 0 3px 5px rgba(0,0,0,0.5); /* Adds a "pushed in" shadow */
-    transition: 0.05s; /* Makes the snap-back feel quick and responsive */
-}
-</style>
-</head>
-<body>
+      /* Menus */
+      .menu-container {
+        background: #2d3436;
+        padding: 40px;
+        border-radius: 20px;
+        border: 4px solid gold;
+        text-align: center;
+        width: 400px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+      }
 
+      /* Leaderboard */
+      .leaderboard {
+        margin-top: 20px;
+        background: rgba(0, 0, 0, 0.4);
+        padding: 15px;
+        border-radius: 10px;
+        width: 100%;
+        box-sizing: border-box;
+        font-family: monospace;
+      }
+      .leaderboard-entry {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid #444;
+        padding: 8px 0;
+        font-size: 14px;
+      }
+
+      input[type="text"] {
+        padding: 12px;
+        border-radius: 5px;
+        border: none;
+        margin-bottom: 15px;
+        width: 80%;
+        text-align: center;
+        font-size: 16px;
+        background: #eee;
+      }
+
+      button {
+        padding: 15px 30px;
+        font-weight: bold;
+        cursor: pointer;
+        border: none;
+        border-radius: 8px;
+        background: #e74c3c;
+        color: white;
+        transition: 0.2s;
+        font-size: 16px;
+        margin: 5px;
+      }
+      button:hover {
+        transform: scale(1.05);
+        filter: brightness(1.2);
+      }
+      button:disabled {
+        background: #555 !important;
+        cursor: not-allowed;
+      }
+
+      /* Animations */
+      .shake {
+        animation: shake 0.4s;
+      }
+      .crit-shake {
+        animation: shake 0.2s 2;
+        filter: brightness(2);
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-15px);
+        }
+        75% {
+          transform: translateX(15px);
+        }
+      }
+      /* Button Click Animation */
+      button:active {
+        transform: scale(0.92); /* Shrinks slightly */
+        filter: brightness(0.8); /* Darkens slightly */
+        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.5); /* Adds a "pushed in" shadow */
+        transition: 0.05s; /* Makes the snap-back feel quick and responsive */
+      }
+    </style>
+  </head>
+  <body>
     <div class="slayer-counter">KILLS: <span class="kills-val">0</span></div>
 
     <div id="home-screen">
-        <div class="menu-container">
-            <h1 style="color: #f1c40f; font-size: 3rem; margin: 0;">RPG ARENA</h1>
-            <p style="letter-spacing: 2px; color: #aaa; margin-bottom: 30px;">LEVEL UP EDITION</p>
-            
-            <button onclick="startGame()" style="background: #2ecc71; font-size: 24px; width: 100%; padding: 20px;">⚔️ PLAY GAME</button>
-            
-            <div class="leaderboard">
-                <h3 style="margin-top:0; color: gold;">🏆 TOP SLAYERS</h3>
-                <div id="home-leaderboard-list"></div>
-            </div>
+      <div class="menu-container">
+        <h1 style="color: #f1c40f; font-size: 3rem; margin: 0">RPG ARENA</h1>
+        <p style="letter-spacing: 2px; color: #aaa; margin-bottom: 30px">
+          LEVEL UP EDITION
+        </p>
+
+        <button
+          onclick="startGame()"
+          style="
+            background: #2ecc71;
+            font-size: 24px;
+            width: 100%;
+            padding: 20px;
+          "
+        >
+          ⚔️ PLAY GAME
+        </button>
+
+        <div class="leaderboard">
+          <h3 style="margin-top: 0; color: gold">🏆 TOP SLAYERS</h3>
+          <div id="home-leaderboard-list"></div>
         </div>
+      </div>
     </div>
 
     <div id="battle-screen" class="hidden">
-        <div class="battle-arena">
-            <div class="character" id="player-card">
-                <div class="level-badge" id="player-rank">RANK: NOVICE</div>
-                <span class="sprite" id="player-visual">🛡️</span>
-                <h3>HERO</h3>
-                <div class="hp-bar-container"><div id="player-hp-bar" class="hp-fill"></div></div>
-                <p id="player-hp-text">100 / 100 HP</p>
-            </div>
-            <div class="character" id="enemy-card">
-                <span class="sprite" id="enemy-visual">👹</span>
-                <h3 id="enemy-name">GOBLIN</h3>
-                <div class="hp-bar-container"><div id="enemy-hp-bar" class="hp-fill"></div></div>
-                <p id="enemy-hp-text">80 / 80 HP</p>
-            </div>
+      <div class="battle-arena">
+        <div class="character" id="player-card">
+          <div class="level-badge" id="player-rank">RANK: NOVICE</div>
+          <span class="sprite" id="player-visual">🛡️</span>
+          <h3>HERO</h3>
+          <div class="hp-bar-container">
+            <div id="player-hp-bar" class="hp-fill"></div>
+          </div>
+          <p id="player-hp-text">100 / 100 HP</p>
+          <div class="hp-bar-container" style="margin-top: 5px">
+            <div
+              id="player-mana-bar"
+              class="hp-fill"
+              style="background: #3498db; width: 100%"
+            ></div>
+          </div>
+          <p id="player-mana-text">15 / 15 MP</p>
         </div>
-        <div class="log" id="battle-log">Welcome to the Arena!</div>
-        <div class="controls">
-            <button id="attack-btn" onclick="handleTurn('attack')">⚔️ ATTACK</button>
-            <button id="heal-btn" onclick="handleTurn('heal')" style="background: #3498db;">💖 HEAL</button>
+        <div class="character" id="enemy-card">
+          <span class="sprite" id="enemy-visual">👹</span>
+          <h3 id="enemy-name">GOBLIN</h3>
+          <div class="hp-bar-container">
+            <div id="enemy-hp-bar" class="hp-fill"></div>
+          </div>
+          <p id="enemy-hp-text">80 / 80 HP</p>
         </div>
+      </div>
+      <div class="log" id="battle-log">Welcome to the Arena!</div>
+      <div class="controls">
+        <button id="attack-btn" onclick="handleTurn('attack')">
+          ⚔️ ATTACK
+        </button>
+        <button
+          id="spell-btn"
+          onclick="openSpellMenu()"
+          style="background: #8e44ad"
+        >
+          ✨ MAGIC
+        </button>
+        <button
+          id="heal-btn"
+          onclick="handleTurn('heal')"
+          style="background: #3498db"
+        >
+          💖 HEAL
+        </button>
+        <button
+          id="block-btn"
+          onclick="handleTurn('block')"
+          style="background: #f39c12"
+        >
+          🛡️ BLOCK
+        </button>
+      </div>
+    </div>
+
+    <!-- spell selection overlay -->
+    <div
+      id="spell-screen"
+      class="hidden"
+      style="
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+      "
+    >
+      <div class="menu-container" style="width: 300px">
+        <h2 style="color: #8e44ad; margin-top: 0">SPELL BOOK</h2>
+        <div id="spell-list"></div>
+        <button
+          onclick="closeSpellMenu()"
+          style="margin-top: 20px; background: #e74c3c"
+        >
+          CANCEL
+        </button>
+      </div>
     </div>
 
     <div id="weapon-screen" class="hidden">
-        <div class="menu-container" style="border-color: #3498db;">
-            <h1 style="color: #3498db;">ARMORY</h1>
-            <p>Choose your new weapon:</p>
-            <button onclick="equipWeapon('dagger', 0)" style="background: #7f8c8d; width: 90%;">🗡️ Dagger (1.2x) FREE</button>
-            <button onclick="equipWeapon('sword', 30)" style="background: #2980b9; width: 90%;">⚔️ Sword (1.8x) - 30G</button>
-            <button onclick="equipWeapon('wand', 45)" style="background: #8e44ad; width: 90%;">🪄 Wand (Chaos) - 45G</button>
-        </div>
+      <div class="menu-container" style="border-color: #3498db">
+        <h1 style="color: #3498db">ARMORY</h1>
+        <p>Choose your new weapon:</p>
+        <button
+          onclick="equipWeapon('dagger', 0)"
+          style="background: #7f8c8d; width: 90%"
+        >
+          🗡️ Dagger (1.2x) FREE
+        </button>
+        <button
+          onclick="equipWeapon('sword', 30)"
+          style="background: #2980b9; width: 90%"
+        >
+          ⚔️ Sword (1.8x) - 30G
+        </button>
+        <button
+          onclick="equipWeapon('wand', 75)"
+          style="background: #8e44ad; width: 90%"
+        >
+          🪄 Wand (Chaos) - 75G
+        </button>
+      </div>
     </div>
 
     <div id="shop-screen" class="hidden">
-        <div class="menu-container">
-            <h1 style="color: gold;">VICTORY</h1>
-            <p>Gold: <b id="gold-count" style="color: #f1c40f;">0</b></p>
-            <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
-                <button onclick="buyUpgrade('attack')" style="background: #d35400; width: 90%;">💪 Attack (+5) - 10G</button>
-                <button onclick="buyUpgrade('hp')" style="background: #27ae60; width: 90%;">🩹 Heal & Max HP - 15G</button>
-                <button onclick="saveGame()" style="background: #f1c40f; color: black; width: 90%;">💾 SAVE PROGRESS</button>
-                <button onclick="nextRound()" style="background: white; color: black; font-size: 20px; width: 90%;">NEXT FOE ➔</button>
-            </div>
+      <div class="menu-container">
+        <h1 style="color: gold">VICTORY</h1>
+        <p>Gold: <b id="gold-count" style="color: #f1c40f">0</b></p>
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+          "
+        >
+          <button
+            onclick="buyUpgrade('attack')"
+            style="background: #d35400; width: 90%"
+          >
+            💪 Attack (+5) - 10G
+          </button>
+          <button
+            onclick="buyUpgrade('hp')"
+            style="background: #27ae60; width: 90%"
+          >
+            🩹 Heal & Max HP - 15G
+          </button>
+          <button
+            onclick="buyUpgrade('mana')"
+            style="background: #2980b9; width: 90%"
+          >
+            ✨ +5 Max Mana - 20G
+          </button>
+          <button
+            onclick="saveGame()"
+            style="background: #f1c40f; color: black; width: 90%"
+          >
+            💾 SAVE PROGRESS
+          </button>
+          <button
+            onclick="nextRound()"
+            style="background: white; color: black; font-size: 20px; width: 90%"
+          >
+            NEXT FOE ➔
+          </button>
         </div>
+      </div>
     </div>
 
     <div id="game-over-screen" class="hidden">
-        <div class="menu-container" style="border-color: #e74c3c; background: #2c0000; width: 450px;">
-            <h1 style="color: #ff4757;">YOU DIED</h1>
-            <p>Final Kills: <b class="kills-val">0</b></p>
-            
-            <div id="name-input-section">
-                <input type="text" id="player-name-input" placeholder="ENTER YOUR NAME" maxlength="10">
-                <br>
-                <button onclick="submitScore()" style="background: #2ecc71;">SAVE SCORE</button>
-            </div>
+      <div
+        class="menu-container"
+        style="border-color: #e74c3c; background: #2c0000; width: 450px"
+      >
+        <h1 style="color: #ff4757">YOU DIED</h1>
+        <p>Final Kills: <b class="kills-val">0</b></p>
 
-            <div class="leaderboard">
-                <h3 style="margin-top:0; color: gold;">🏆 HALL OF FAME</h3>
-                <div id="leaderboard-list"></div>
-            </div>
-            
-            <br>
-            <button onclick="resetGame()" style="background: white; color: black; padding: 10px 20px;">RESTART</button>
+        <div id="name-input-section">
+          <input
+            type="text"
+            id="player-name-input"
+            placeholder="ENTER YOUR NAME"
+            maxlength="10"
+          />
+          <br />
+          <button onclick="submitScore()" style="background: #2ecc71">
+            SAVE SCORE
+          </button>
         </div>
+
+        <div class="leaderboard">
+          <h3 style="margin-top: 0; color: gold">🏆 HALL OF FAME</h3>
+          <div id="leaderboard-list"></div>
+        </div>
+
+        <br />
+        <button
+          onclick="resetGame()"
+          style="background: white; color: black; padding: 10px 20px"
+        >
+          RESTART
+        </button>
+      </div>
     </div>
 
     <script>
-        // --- Game Config ---
-        let player = { hp: 100, maxHp: 100, attack: 15, gold: 0, weapon: 'fists', kills: 0, level: 1, critChance: 0.15 };
-        let enemy = { name: "Goblin", sprite: "👹", hp: 80, maxHp: 80, attack: 12 };
-        let isPlayerTurn = true;
-        let round = 1;
+      // --- Game Config ---
+      let player = {
+        hp: 100,
+        maxHp: 100,
+        attack: 15,
+        gold: 0,
+        weapon: "fists",
+        kills: 0,
+        level: 1,
+        critChance: 0.15,
+        blocking: false,
+        mana: 15,
+        maxMana: 15,
+      };
+      let enemy = {
+        name: "Goblin",
+        sprite: "👹",
+        hp: 80,
+        maxHp: 80,
+        attack: 12,
+        blocking: false,
+      };
+      let isPlayerTurn = true;
+      let round = 1;
 
-        const ranks = [
-            { k: 0, n: "NOVICE" },
-            { k: 3, n: "WARRIOR", b: "Crit Chance Up!" },
-            { k: 10, n: "SLAYER", b: "Attack Boost!" },
-            { k: 25, n: "ELITE", b: "Crit Chance Max!" },
-            { k: 50, n: "LEGEND", b: "God Mode Enabled?" }
-        ];
+      const ranks = [
+        { k: 0, n: "NOVICE" },
+        { k: 3, n: "WARRIOR", b: "Crit Chance Up!" },
+        { k: 10, n: "SLAYER", b: "Attack Boost!" },
+        { k: 25, n: "ELITE", b: "Crit Chance Max!" },
+        { k: 50, n: "LEGEND", b: "God Mode Enabled?" },
+      ];
 
-        const monsters = [
-            { name: "Slime", sprite: "💧", hM: 0.7, aM: 0.6 },
-            { name: "Skeleton", sprite: "💀", hM: 1.1, aM: 1.1 },
-            { name: "Orc", sprite: "🧌", hM: 1.5, aM: 1.3 }
-        ];
+      const monsters = [
+        { name: "Slime", sprite: "💧", hM: 0.7, aM: 0.6 },
+        { name: "Skeleton", sprite: "💀", hM: 1.1, aM: 1.1 },
+        { name: "Orc", sprite: "🧌", hM: 1.5, aM: 1.3 },
+      ];
 
-        // --- Audio ---
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playSfx(f, type = 'sine', d = 0.1, v = 0.1) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(f, audioCtx.currentTime);
-            g.gain.setValueAtTime(v, audioCtx.currentTime);
-            g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + d);
-            osc.connect(g); g.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + d);
+      // spell definitions
+      const spells = [
+        { id: "fire", name: "Fireball", cost: 5, dmgMin: 20, dmgMax: 30 },
+        { id: "ice", name: "Ice Shard", cost: 8, dmgMin: 15, dmgMax: 40 },
+        {
+          id: "lightning",
+          name: "Lightning",
+          cost: 12,
+          dmgMin: 30,
+          dmgMax: 50,
+        },
+      ];
+
+      // spell/menu logic
+      function openSpellMenu() {
+        if (player.weapon !== "wand") return;
+        toggleBtns(false);
+        const list = document.getElementById("spell-list");
+        list.innerHTML = spells
+          .map((s) => {
+            const affordable = player.mana >= s.cost;
+            return `<button onclick="castSpell('${s.id}')" style="width:100%; margin:5px 0; background:${affordable ? "#8e44ad" : "#555"}" ${!affordable ? "disabled" : ""}>
+                    ${s.name} (${s.cost}MP)
+                  </button>`;
+          })
+          .join("");
+        document.getElementById("spell-screen").classList.remove("hidden");
+      }
+      function closeSpellMenu() {
+        document.getElementById("spell-screen").classList.add("hidden");
+        if (isPlayerTurn) toggleBtns(true);
+      }
+      function castSpell(id) {
+        const spell = spells.find((s) => s.id === id);
+        if (!spell) return;
+        if (player.mana < spell.cost) return;
+        player.mana -= spell.cost;
+        const dmg = Math.floor(
+          spell.dmgMin + Math.random() * (spell.dmgMax - spell.dmgMin),
+        );
+        logMessage(`✨ ${spell.name} deals ${dmg} damage!`);
+        playSfx(1000, "sawtooth", 0.2);
+        enemy.hp = Math.max(0, enemy.hp - dmg);
+        updateUI();
+        closeSpellMenu();
+        // after casting, enemy turn begins
+        if (enemy.hp <= 0) {
+          player.kills++;
+          checkLevelUp();
+          setTimeout(goToShop, 800);
+        } else {
+          isPlayerTurn = false;
+          setTimeout(enemyTurn, 1000);
+        }
+      }
+
+      // --- Audio ---
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      function playSfx(f, type = "sine", d = 0.1, v = 0.1) {
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.setValueAtTime(v, audioCtx.currentTime);
+        g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + d);
+        osc.connect(g);
+        g.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + d);
+      }
+
+      // --- Core Logic ---
+      function startGame() {
+        playSfx(440, "sine", 0.2);
+        document.getElementById("home-screen").classList.add("hidden");
+        document.getElementById("battle-screen").classList.remove("hidden");
+        loadGame();
+        updateUI();
+      }
+
+      function checkLevelUp() {
+        const nextRank = ranks.find((r) => r.k === player.kills);
+        if (nextRank && player.kills > 0) {
+          player.level++;
+          if (nextRank.n === "WARRIOR") player.critChance = 0.25;
+          if (nextRank.n === "SLAYER") player.attack += 10;
+          if (nextRank.n === "ELITE") player.critChance = 0.4;
+          logMessage(
+            `<b style="color:#f1c40f">LEVEL UP! REACHED ${nextRank.n} RANK!</b>`,
+          );
+          playSfx(800, "sine", 0.5, 0.2);
+        }
+      }
+
+      function handleTurn(action) {
+        if (!isPlayerTurn || player.hp <= 0) return;
+        toggleBtns(false);
+
+        if (action === "attack") {
+          let m =
+            player.weapon === "dagger"
+              ? 1.2
+              : player.weapon === "sword"
+                ? 1.8
+                : player.weapon === "wand"
+                  ? Math.random() * 2.5 + 0.5
+                  : 1;
+          let isCrit = Math.random() < player.critChance;
+          let dmg = Math.floor(player.attack * (0.8 + Math.random() * 0.4) * m);
+
+          if (enemy.blocking) {
+            dmg = Math.floor(dmg * 0.5);
+            logMessage(`<i>Enemy blocks!</i>`);
+            enemy.blocking = false;
+          }
+          if (isCrit) {
+            dmg *= 2;
+            logMessage(`<b style="color:orange">CRIT! ${dmg} DMG!</b>`);
+            playSfx(1200, "sine", 0.2);
+            animate("enemy-card", true);
+          } else {
+            logMessage(`You deal ${dmg} dmg.`);
+            playSfx(150, "sawtooth");
+            animate("enemy-card", false);
+          }
+          enemy.hp = Math.max(0, enemy.hp - dmg);
+        } else if (action === "heal") {
+          player.hp = Math.min(player.maxHp, player.hp + 25);
+          logMessage("Healed!");
+          playSfx(500);
+        } else if (action === "block") {
+          player.blocking = true;
+          logMessage("You brace for the enemy's attack!");
+          playSfx(300, "triangle", 0.2);
         }
 
-        // --- Core Logic ---
-        function startGame() {
-            playSfx(440, 'sine', 0.2);
-            document.getElementById('home-screen').classList.add('hidden');
-            document.getElementById('battle-screen').classList.remove('hidden');
-            loadGame();
-            updateUI();
+        updateUI();
+        if (enemy.hp <= 0) {
+          player.kills++;
+          checkLevelUp();
+          setTimeout(goToShop, 800);
+        } else {
+          isPlayerTurn = false;
+          setTimeout(enemyTurn, 1000);
+        }
+      }
+
+      function enemyTurn() {
+        // close spell menu if somehow open
+        document.getElementById("spell-screen").classList.add("hidden");
+        if (player.hp <= 0) return;
+
+        // decide whether to heal, block or attack
+        const lowThreshold = enemy.maxHp * 0.3;
+        let action;
+
+        if (enemy.hp > 0 && enemy.hp < lowThreshold && Math.random() < 0.4) {
+          action = "heal";
+        } else if (Math.random() < 0.3) {
+          action = "block";
+        } else {
+          action = "attack";
         }
 
-        function checkLevelUp() {
-            const nextRank = ranks.find(r => r.k === player.kills);
-            if (nextRank && player.kills > 0) {
-                player.level++;
-                if(nextRank.n === "WARRIOR") player.critChance = 0.25;
-                if(nextRank.n === "SLAYER") player.attack += 10;
-                if(nextRank.n === "ELITE") player.critChance = 0.40;
-                logMessage(`<b style="color:#f1c40f">LEVEL UP! REACHED ${nextRank.n} RANK!</b>`);
-                playSfx(800, 'sine', 0.5, 0.2);
-            }
+        if (action === "heal") {
+          const healAmt = Math.floor(enemy.maxHp * 0.2);
+          enemy.hp = Math.min(enemy.maxHp, enemy.hp + healAmt);
+          logMessage(`${enemy.name} heals for ${healAmt}!`);
+          playSfx(700, "triangle", 0.3);
+          updateUI();
+          isPlayerTurn = true;
+          toggleBtns(true);
+          return;
         }
 
-        function handleTurn(action) {
-            if (!isPlayerTurn || player.hp <= 0) return;
-            toggleBtns(false);
-
-            if (action === 'attack') {
-                let m = (player.weapon === 'dagger') ? 1.2 : (player.weapon === 'sword') ? 1.8 : (player.weapon === 'wand') ? (Math.random()*2.5)+0.5 : 1;
-                let isCrit = Math.random() < player.critChance;
-                let dmg = Math.floor(player.attack * (0.8 + Math.random() * 0.4) * m);
-                
-                if (isCrit) { 
-                    dmg *= 2; 
-                    logMessage(`<b style="color:orange">CRIT! ${dmg} DMG!</b>`); 
-                    playSfx(1200, 'sine', 0.2); 
-                    animate('enemy-card', true); 
-                } else { 
-                    logMessage(`You deal ${dmg} dmg.`); 
-                    playSfx(150, 'sawtooth'); 
-                    animate('enemy-card', false); 
-                }
-                enemy.hp = Math.max(0, enemy.hp - dmg);
-            } else {
-                player.hp = Math.min(player.maxHp, player.hp + 25);
-                logMessage("Healed!"); playSfx(500);
-            }
-
-            updateUI();
-            if (enemy.hp <= 0) {
-                player.kills++;
-                checkLevelUp();
-                setTimeout(goToShop, 800);
-            } else { isPlayerTurn = false; setTimeout(enemyTurn, 1000); }
+        if (action === "block") {
+          enemy.blocking = true;
+          logMessage(`${enemy.name} is blocking!`);
+          playSfx(300, "triangle", 0.2);
+          isPlayerTurn = true;
+          toggleBtns(true);
+          return;
         }
 
-        function enemyTurn() {
-            if (player.hp <= 0) return;
-            let dmg = Math.floor(enemy.attack * (0.8 + Math.random() * 0.4));
-            player.hp = Math.max(0, player.hp - dmg);
-            logMessage(`${enemy.name} hits for ${dmg}.`);
-            playSfx(100, 'square', 0.15, 0.2);
-            animate('player-card', false);
-            updateUI();
-            if (player.hp <= 0) setTimeout(showGameOver, 500);
-            else { isPlayerTurn = true; toggleBtns(true); }
+        // regular attack
+        let dmg = Math.floor(enemy.attack * (0.8 + Math.random() * 0.4));
+        if (player.blocking) {
+          dmg = Math.floor(dmg * 0.5);
+          logMessage("Your block absorbs some damage!");
+          player.blocking = false;
         }
-
-        // --- Leaderboard Logic ---
-        function submitScore() {
-            const nameInput = document.getElementById('player-name-input');
-            const name = nameInput.value.trim().toUpperCase() || "ANONYMOUS";
-            let scores = JSON.parse(localStorage.getItem('rpg_leaderboard')) || [];
-            scores.push({ name: name, kills: player.kills });
-            scores.sort((a, b) => b.kills - a.kills);
-            scores = scores.slice(0, 5);
-            localStorage.setItem('rpg_leaderboard', JSON.stringify(scores));
-            document.getElementById('name-input-section').classList.add('hidden');
-            displayLeaderboard();
+        player.hp = Math.max(0, player.hp - dmg);
+        logMessage(`${enemy.name} hits for ${dmg}.`);
+        playSfx(100, "square", 0.15, 0.2);
+        animate("player-card", false);
+        updateUI();
+        if (player.hp <= 0) setTimeout(showGameOver, 500);
+        else {
+          isPlayerTurn = true;
+          toggleBtns(true);
         }
+      }
 
-        function displayLeaderboard() {
-            const scores = JSON.parse(localStorage.getItem('rpg_leaderboard')) || [];
-            const scoreHTML = scores.length === 0 
-                ? "<div style='color: #888;'>No legends yet...</div>"
-                : scores.map((entry, index) => `
+      // --- Leaderboard Logic ---
+      function submitScore() {
+        const nameInput = document.getElementById("player-name-input");
+        const name = nameInput.value.trim().toUpperCase() || "ANONYMOUS";
+        let scores = JSON.parse(localStorage.getItem("rpg_leaderboard")) || [];
+        scores.push({ name: name, kills: player.kills });
+        scores.sort((a, b) => b.kills - a.kills);
+        scores = scores.slice(0, 5);
+        localStorage.setItem("rpg_leaderboard", JSON.stringify(scores));
+        document.getElementById("name-input-section").classList.add("hidden");
+        displayLeaderboard();
+      }
+
+      function displayLeaderboard() {
+        const scores =
+          JSON.parse(localStorage.getItem("rpg_leaderboard")) || [];
+        const scoreHTML =
+          scores.length === 0
+            ? "<div style='color: #888;'>No legends yet...</div>"
+            : scores
+                .map(
+                  (entry, index) => `
                     <div class="leaderboard-entry">
                         <span>${index + 1}. ${entry.name}</span>
                         <span style="color: #ff4757;">${entry.kills} KILLS</span>
-                    </div>`).join('');
-            
-            if(document.getElementById('home-leaderboard-list')) document.getElementById('home-leaderboard-list').innerHTML = scoreHTML;
-            if(document.getElementById('leaderboard-list')) document.getElementById('leaderboard-list').innerHTML = scoreHTML;
+                    </div>`,
+                )
+                .join("");
+
+        if (document.getElementById("home-leaderboard-list"))
+          document.getElementById("home-leaderboard-list").innerHTML =
+            scoreHTML;
+        if (document.getElementById("leaderboard-list"))
+          document.getElementById("leaderboard-list").innerHTML = scoreHTML;
+      }
+
+      // --- Navigation & UI ---
+      function updateUI() {
+        document.getElementById("player-hp-bar").style.width =
+          (player.hp / player.maxHp) * 100 + "%";
+        document.getElementById("player-hp-text").innerText =
+          `${Math.floor(player.hp)}/${player.maxHp} HP`;
+        document.getElementById("player-mana-bar").style.width =
+          (player.mana / player.maxMana) * 100 + "%";
+        document.getElementById("player-mana-text").innerText =
+          `${Math.floor(player.mana)}/${player.maxMana} MP`;
+        document.getElementById("enemy-hp-bar").style.width =
+          (enemy.hp / enemy.maxHp) * 100 + "%";
+        document.getElementById("enemy-hp-text").innerText =
+          `${Math.floor(enemy.hp)}/${Math.floor(enemy.maxHp)} HP`;
+        document.getElementById("enemy-name").innerText = enemy.name;
+        document.getElementById("enemy-visual").innerText = enemy.sprite;
+        document.getElementById("gold-count").innerText = player.gold;
+        document
+          .querySelectorAll(".kills-val")
+          .forEach((el) => (el.innerText = player.kills));
+        const currentRank = [...ranks]
+          .reverse()
+          .find((r) => player.kills >= r.k);
+        document.getElementById("player-rank").innerText =
+          `RANK: ${currentRank.n}`;
+
+        // disable spell button if no wand or insufficient mana
+        const spellBtn = document.getElementById("spell-btn");
+        if (spellBtn) {
+          const minCost = Math.min(...spells.map((s) => s.cost));
+          spellBtn.disabled =
+            !isPlayerTurn || player.weapon !== "wand" || player.mana < minCost;
         }
+      }
 
-        // --- Navigation & UI ---
-        function updateUI() {
-            document.getElementById('player-hp-bar').style.width = (player.hp / player.maxHp * 100) + "%";
-            document.getElementById('player-hp-text').innerText = `${Math.floor(player.hp)}/${player.maxHp} HP`;
-            document.getElementById('enemy-hp-bar').style.width = (enemy.hp / enemy.maxHp * 100) + "%";
-            document.getElementById('enemy-hp-text').innerText = `${Math.floor(enemy.hp)}/${Math.floor(enemy.maxHp)} HP`;
-            document.getElementById('enemy-name').innerText = enemy.name;
-            document.getElementById('enemy-visual').innerText = enemy.sprite;
-            document.getElementById('gold-count').innerText = player.gold;
-            document.querySelectorAll('.kills-val').forEach(el => el.innerText = player.kills);
-            const currentRank = [...ranks].reverse().find(r => player.kills >= r.k);
-            document.getElementById('player-rank').innerText = `RANK: ${currentRank.n}`;
+      function goToShop() {
+        player.gold += 10 + round * 5;
+        playSfx(600, "sine", 0.5);
+        document.getElementById("battle-screen").classList.add("hidden");
+        if (round % 3 === 0)
+          document.getElementById("weapon-screen").classList.remove("hidden");
+        else document.getElementById("shop-screen").classList.remove("hidden");
+        updateUI();
+      }
+
+      function nextRound() {
+        // ensure menu is closed
+        document.getElementById("spell-screen").classList.add("hidden");
+        round++;
+        document.getElementById("shop-screen").classList.add("hidden");
+        document.getElementById("battle-screen").classList.remove("hidden");
+        const m = monsters[Math.floor(Math.random() * monsters.length)];
+        enemy = {
+          name: round % 7 === 0 ? "BOSS DRAGON" : m.name,
+          sprite: round % 7 === 0 ? "🐉" : m.sprite,
+          hp: (80 + round * 7) * (round % 7 === 0 ? 3 : m.hM),
+          maxHp: (80 + round * 7) * (round % 7 === 0 ? 3 : m.hM),
+          attack: (10 + round * 2) * (round % 7 === 0 ? 2 : m.aM),
+        };
+        isPlayerTurn = true;
+        player.mana = player.maxMana; // refill mana at start of each fight
+        toggleBtns(true);
+        updateUI();
+      }
+
+      function buyUpgrade(t) {
+        if (t === "attack" && player.gold >= 10) {
+          player.gold -= 10;
+          player.attack += 5;
+          playSfx(800);
+        } else if (t === "hp" && player.gold >= 15) {
+          player.gold -= 15;
+          player.maxHp += 20;
+          player.hp = player.maxHp;
+          playSfx(800);
+        } else if (t === "mana" && player.gold >= 20 && player.maxMana < 100) {
+          player.gold -= 20;
+          player.maxMana = Math.min(100, player.maxMana + 5);
+          player.mana = player.maxMana;
+          playSfx(800);
         }
+        updateUI();
+      }
 
-        function goToShop() {
-            player.gold += (10 + round * 5);
-            playSfx(600, 'sine', 0.5);
-            document.getElementById('battle-screen').classList.add('hidden');
-            if (round % 3 === 0) document.getElementById('weapon-screen').classList.remove('hidden');
-            else document.getElementById('shop-screen').classList.remove('hidden');
-            updateUI();
-        }
-
-        function nextRound() {
-            round++;
-            document.getElementById('shop-screen').classList.add('hidden');
-            document.getElementById('battle-screen').classList.remove('hidden');
-            const m = monsters[Math.floor(Math.random() * monsters.length)];
-            enemy = {
-                name: (round % 5 === 0) ? "BOSS DRAGON" : m.name,
-                sprite: (round % 5 === 0) ? "🐉" : m.sprite,
-                hp: (80 + round*10) * (round % 5 === 0 ? 3 : m.hM),
-                maxHp: (80 + round*10) * (round % 5 === 0 ? 3 : m.hM),
-                attack: (10 + round*2) * (round % 5 === 0 ? 2 : m.aM)
-            };
-            isPlayerTurn = true; toggleBtns(true);
-            updateUI();
-        }
-
-        function buyUpgrade(t) {
-            if (t === 'attack' && player.gold >= 10) { player.gold -= 10; player.attack += 5; playSfx(800); }
-            else if (t === 'hp' && player.gold >= 15) { player.gold -= 15; player.maxHp += 20; player.hp = player.maxHp; playSfx(800); }
-            updateUI();
-        }
-
-        function showGameOver() {
-            playSfx(50, 'sawtooth', 1.0, 0.3);
-            document.getElementById('battle-screen').classList.add('hidden');
-            document.getElementById('game-over-screen').classList.remove('hidden');
-            displayLeaderboard();
-            updateUI();
-        }
-
-        function equipWeapon(type, cost) {
-            if (player.gold >= cost) {
-                player.gold -= cost; player.weapon = type;
-                updateWeaponVisual();
-                document.getElementById('weapon-screen').classList.add('hidden');
-                document.getElementById('shop-screen').classList.remove('hidden');
-                updateUI();
-            }
-        }
-
-        function toggleBtns(on) {
-            document.getElementById('attack-btn').disabled = !on;
-            document.getElementById('heal-btn').disabled = !on;
-        }
-
-        function logMessage(msg) {
-            const log = document.getElementById('battle-log');
-            log.innerHTML += `<br>> ${msg}`;
-            log.scrollTop = log.scrollHeight;
-        }
-
-        function animate(id, isCrit) {
-            const el = document.getElementById(id);
-            const cn = isCrit ? 'crit-shake' : 'shake';
-            el.classList.add(cn);
-            setTimeout(() => el.classList.remove(cn), 400);
-        }
-
-        function saveGame() {
-            localStorage.setItem('rpg_save_final', JSON.stringify({ player, round }));
-            logMessage("Save Complete.");
-        }
-
-        function loadGame() {
-            const s = localStorage.getItem('rpg_save_final');
-            if (s) { const d = JSON.parse(s); player = d.player; round = d.round; updateWeaponVisual(); }
-        }
-
-        function resetGame() { localStorage.removeItem('rpg_save_final'); location.reload(); }
-        function updateWeaponVisual() { document.getElementById('player-visual').innerText = { fists: "🛡️", dagger: "🗡️", sword: "⚔️", wand: "🪄" }[player.weapon]; }
-
-        // Initialize
+      function showGameOver() {
+        playSfx(50, "sawtooth", 1.0, 0.3);
+        document.getElementById("battle-screen").classList.add("hidden");
+        document.getElementById("game-over-screen").classList.remove("hidden");
         displayLeaderboard();
+        updateUI();
+      }
+
+      function equipWeapon(type, cost) {
+        if (player.gold >= cost) {
+          player.gold -= cost;
+          player.weapon = type;
+          updateWeaponVisual();
+          document.getElementById("weapon-screen").classList.add("hidden");
+          document.getElementById("shop-screen").classList.remove("hidden");
+          updateUI();
+        }
+      }
+
+      function toggleBtns(on) {
+        document.getElementById("attack-btn").disabled = !on;
+        document.getElementById("heal-btn").disabled = !on;
+        document.getElementById("block-btn").disabled = !on;
+        const spellBtn = document.getElementById("spell-btn");
+        if (spellBtn) spellBtn.disabled = !on;
+      }
+
+      function logMessage(msg) {
+        const log = document.getElementById("battle-log");
+        log.innerHTML += `<br>> ${msg}`;
+        log.scrollTop = log.scrollHeight;
+      }
+
+      function animate(id, isCrit) {
+        const el = document.getElementById(id);
+        const cn = isCrit ? "crit-shake" : "shake";
+        el.classList.add(cn);
+        setTimeout(() => el.classList.remove(cn), 400);
+      }
+
+      function saveGame() {
+        localStorage.setItem(
+          "rpg_save_final",
+          JSON.stringify({ player, round }),
+        );
+        logMessage("Save Complete.");
+      }
+
+      function loadGame() {
+        const s = localStorage.getItem("rpg_save_final");
+        if (s) {
+          const d = JSON.parse(s);
+          player = d.player;
+          round = d.round;
+          updateWeaponVisual();
+        }
+      }
+
+      function resetGame() {
+        localStorage.removeItem("rpg_save_final");
+        location.reload();
+      }
+      function updateWeaponVisual() {
+        document.getElementById("player-visual").innerText = {
+          fists: "🛡️",
+          dagger: "🗡️",
+          sword: "⚔️",
+          wand: "🪄",
+        }[player.weapon];
+      }
+
+      // Initialize
+      displayLeaderboard();
     </script>
-</body>
+  </body>
 </html>
