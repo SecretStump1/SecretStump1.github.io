@@ -45,7 +45,14 @@
         .shake { animation: shake 0.4s; }
         .crit-shake { animation: shake 0.2s 2; filter: brightness(2); }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-15px); } 75% { transform: translateX(15px); } }
-    </style>
+   /* Button Click Animation */
+button:active {
+    transform: scale(0.92); /* Shrinks slightly */
+    filter: brightness(0.8); /* Darkens slightly */
+    box-shadow: inset 0 3px 5px rgba(0,0,0,0.5); /* Adds a "pushed in" shadow */
+    transition: 0.05s; /* Makes the snap-back feel quick and responsive */
+}
+</style>
 </head>
 <body>
 
@@ -92,9 +99,9 @@
         <div class="menu-container" style="border-color: #3498db;">
             <h1 style="color: #3498db;">ARMORY</h1>
             <p>Choose your new weapon:</p>
-            <button onclick="equipWeapon('dagger', 0)" style="background: #7f8c8d; width: 90%;">🗡️ Dagger (1.2x)</button>
-            <button onclick="equipWeapon('sword', 30)" style="background: #2980b9; width: 90%;">⚔️ Sword (1.8x)</button>
-            <button onclick="equipWeapon('wand', 45)" style="background: #8e44ad; width: 90%;">🪄 Wand (Chaos)</button>
+            <button onclick="equipWeapon('dagger', 0)" style="background: #7f8c8d; width: 90%;">🗡️ Dagger (1.2x) FREE</button>
+            <button onclick="equipWeapon('sword', 30)" style="background: #2980b9; width: 90%;">⚔️ Sword (1.8x) - 30G</button>
+            <button onclick="equipWeapon('wand', 45)" style="background: #8e44ad; width: 90%;">🪄 Wand (Chaos) - 45G</button>
         </div>
     </div>
 
@@ -142,9 +149,9 @@
         const ranks = [
             { k: 0, n: "NOVICE" },
             { k: 3, n: "WARRIOR", b: "Crit Chance Up!" },
-            { k: 7, n: "SLAYER", b: "Attack Boost!" },
-            { k: 12, n: "ELITE", b: "Crit Chance Max!" },
-            { k: 20, n: "LEGEND", b: "God Mode Enabled?" }
+            { k: 10, n: "SLAYER", b: "Attack Boost!" },
+            { k: 25, n: "ELITE", b: "Crit Chance Max!" },
+            { k: 50, n: "LEGEND", b: "God Mode Enabled?" }
         ];
 
         const monsters = [
