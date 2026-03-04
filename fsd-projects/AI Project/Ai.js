@@ -8,14 +8,54 @@ let enemy = { name: "Goblin", hp: 80, maxHp: 80, attack: 12 };
 let isPlayerTurn = true;
 let enemyLevel = 1;
 
-// Add sprites to your monster types
-const monsterTypes = [
-    { name: "Slime", sprite: "💧", hpMult: 0.8, atkMult: 0.7, color: "#2ecc71" },
-    { name: "Goblin", sprite: "👺", hpMult: 1.0, atkMult: 1.0, color: "#d35400" },
-    { name: "Skeleton", sprite: "💀", hpMult: 1.2, atkMult: 1.1, color: "#ecf0f1" },
-    { name: "Orc", sprite: "👹", hpMult: 1.5, atkMult: 1.3, color: "#27ae60" },
-    { name: "Ghost", sprite: "👻", hpMult: 0.9, atkMult: 1.5, color: "#9b59b6" }
-];
+// --- Improved Monster Scaling Data ---
+      const monsters = [
+        { name: "Slime", sprite: "💧", hpWeight: 1.4, atkWeight: 0.7, goldWeight: 0.9 },
+        { name: "Skeleton", sprite: "💀", hpWeight: 1.0, atkWeight: 1.2, goldWeight: 1.1 },
+        { name: "Orc", sprite: "🧌", hpWeight: 1.2, atkWeight: 1.5, goldWeight: 1.3 },
+        { name: "Wraith", sprite: "👻", hpWeight: 0.8, atkWeight: 2.0, goldWeight: 1.5 },
+        { name: "Golem", sprite: "🗿", hpWeight: 2.5, atkWeight: 0.9, goldWeight: 1.8 }
+      ];
+
+      function nextRound() {
+        document.getElementById("shop-screen").classList.add("hidden");
+        round++;
+        
+        // Pick a random monster template
+        const m = monsters[Math.floor(Math.random() * monsters.length)];
+        
+        // Difficulty Multiplier
+        const diffScale = difficulty === "Hard" ? 1.4 : (difficulty === "Easy" ? 0.7 : 1.0);
+        
+        // BOSS FACTOR: Every 5 rounds, stats jump significantly
+        const bossFactor = (round % 5 === 0) ? 1.5 : 1.0;
+        const bossPrefix = (round % 5 === 0) ? "ELITE " : "";
+
+        /* SCALING FORMULA: 
+           Base * (Growth ^ Round) * MonsterWeight * Difficulty
+        */
+        const growthBase = 1.12; // 12% increase per round compounded
+        const scaleFactor = Math.pow(growthBase, round);
+
+        enemy = {
+          name: bossPrefix + m.name,
+          sprite: (round % 5 === 0) ? "👺" : m.sprite,
+          hp: Math.floor(70 * scaleFactor * m.hpWeight * diffScale * bossFactor),
+          attack: Math.floor(10 * scaleFactor * m.atkWeight * diffScale * bossFactor),
+          blocking: false
+        };
+        
+        // Set Max HP for the bar calculation
+        enemy.maxHp = enemy.hp;
+        
+        document.getElementById("battle-screen").classList.remove("hidden");
+        player.mana = player.maxMana; // Restore mana between rounds
+        isPlayerTurn = true;
+        toggleBtns(true);
+        updateUI();
+        
+        logMessage(`<b style="color:#e74c3c">ROUND ${round}: A ${enemy.name} approaches!</b>`);
+      }
 
 function updateUI() {
     document.getElementById('player-hp').style.width = (player.hp / player.maxHp * 100) + "%";

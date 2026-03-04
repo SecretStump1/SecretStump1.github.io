@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RPG Arena: Level Up Edition</title>
+    <title>RPG Arena: Pro Edition</title>
     <style>
       body {
         font-family: "Segoe UI", sans-serif;
@@ -19,11 +19,7 @@
       }
 
       /* Screens */
-      #home-screen,
-      #battle-screen,
-      #shop-screen,
-      #weapon-screen,
-      #game-over-screen {
+      #home-screen, #class-screen, #battle-screen, #shop-screen, #spell-shop-screen, #weapon-screen, #game-over-screen {
         width: 100%;
         height: 100%;
         display: flex;
@@ -35,9 +31,7 @@
         left: 0;
         transition: 0.5s;
       }
-      .hidden {
-        display: none !important;
-      }
+      .hidden { display: none !important; }
 
       /* UI Elements */
       .slayer-counter {
@@ -67,6 +61,7 @@
         display: flex;
         gap: 40px;
         margin-bottom: 20px;
+        z-index: 2;
       }
       .character {
         text-align: center;
@@ -76,6 +71,7 @@
         border-radius: 15px;
         border: 3px solid #34495e;
         transition: 0.1s;
+        position: relative;
       }
       .sprite {
         font-size: 80px;
@@ -85,13 +81,8 @@
       }
 
       @keyframes float {
-        0%,
-        100% {
-          transform: translateY(0);
-        }
-        50% {
-          transform: translateY(-15px);
-        }
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
       }
 
       .hp-bar-container {
@@ -121,13 +112,10 @@
         font-size: 14px;
         margin-bottom: 20px;
         border-radius: 5px;
+        z-index: 2;
       }
-      .controls {
-        display: flex;
-        gap: 15px;
-      }
+      .controls { display: flex; gap: 15px; z-index: 2; }
 
-      /* Menus */
       .menu-container {
         background: #2d3436;
         padding: 40px;
@@ -138,7 +126,6 @@
         box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
       }
 
-      /* Leaderboard */
       .leaderboard {
         margin-top: 20px;
         background: rgba(0, 0, 0, 0.4);
@@ -179,66 +166,56 @@
         font-size: 16px;
         margin: 5px;
       }
-      button:hover {
-        transform: scale(1.05);
-        filter: brightness(1.2);
-      }
-      button:disabled {
-        background: #555 !important;
-        cursor: not-allowed;
-      }
+      button:hover { transform: scale(1.05); filter: brightness(1.2); }
+      button:disabled { background: #555 !important; cursor: not-allowed; transform: scale(1); filter: brightness(1); }
 
       /* Animations */
-      .shake {
-        animation: shake 0.4s;
-      }
-      .crit-shake {
-        animation: shake 0.2s 2;
-        filter: brightness(2);
-      }
+      .shake { animation: shake 0.4s; }
+      .crit-shake { animation: shake 0.2s 2; filter: brightness(2); }
       @keyframes shake {
-        0%,
-        100% {
-          transform: translateX(0);
-        }
-        25% {
-          transform: translateX(-15px);
-        }
-        75% {
-          transform: translateX(15px);
-        }
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-15px); }
+        75% { transform: translateX(15px); }
       }
-      /* Button Click Animation */
-      button:active {
-        transform: scale(0.92); /* Shrinks slightly */
-        filter: brightness(0.8); /* Darkens slightly */
-        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.5); /* Adds a "pushed in" shadow */
-        transition: 0.05s; /* Makes the snap-back feel quick and responsive */
+
+      .fx-particle {
+        position: absolute;
+        font-size: 70px;
+        animation: floatUpFade 1s forwards ease-out;
+        pointer-events: none;
+        z-index: 100;
+      }
+      @keyframes floatUpFade {
+        0% { transform: translateY(0) scale(1); opacity: 1; }
+        100% { transform: translateY(-100px) scale(3); opacity: 0; }
+      }
+      .class-card {
+          cursor: pointer;
+          transition: 0.3s;
+      }
+      .class-card:hover {
+          background: #34495e;
+          transform: translateY(-5px);
+          border-color: #f1c40f;
       }
     </style>
   </head>
   <body>
-    <div class="slayer-counter">KILLS: <span class="kills-val">0</span></div>
+    <div class="slayer-counter">KILLS: <span class="kills-val">0</span> | <span id="diff-display">NORMAL</span></div>
 
     <div id="home-screen">
       <div class="menu-container">
         <h1 style="color: #f1c40f; font-size: 3rem; margin: 0">RPG ARENA</h1>
-        <p style="letter-spacing: 2px; color: #aaa; margin-bottom: 30px">
-          LEVEL UP EDITION
-        </p>
+        <p style="letter-spacing: 2px; color: #aaa; margin-bottom: 30px">PRO EDITION</p>
+        
+        <div style="margin-bottom: 20px;">
+            <p style="margin: 5px;">SELECT DIFFICULTY:</p>
+            <button onclick="setDifficulty('Easy')" id="btn-easy" style="background: #27ae60; padding: 10px;">EASY</button>
+            <button onclick="setDifficulty('Normal')" id="btn-normal" style="background: #2980b9; padding: 10px; border: 2px solid white;">NORMAL</button>
+            <button onclick="setDifficulty('Hard')" id="btn-hard" style="background: #c0392b; padding: 10px;">HARD</button>
+        </div>
 
-        <button
-          onclick="startGame()"
-          style="
-            background: #2ecc71;
-            font-size: 24px;
-            width: 100%;
-            padding: 20px;
-          "
-        >
-          ⚔️ PLAY GAME
-        </button>
-
+        <button onclick="showClassPicker()" style="background: #2ecc71; font-size: 24px; width: 100%; padding: 20px;">⚔️ PLAY GAME</button>
         <div class="leaderboard">
           <h3 style="margin-top: 0; color: gold">🏆 TOP SLAYERS</h3>
           <div id="home-leaderboard-list"></div>
@@ -246,231 +223,142 @@
       </div>
     </div>
 
+    <div id="class-screen" class="hidden">
+        <div class="menu-container" style="width: 600px;">
+            <h2 style="color: #f1c40f;">SELECT YOUR CLASS</h2>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <div class="character class-card" onclick="selectClass('Warrior')">
+                    <span class="sprite">🛡️</span>
+                    <h3>WARRIOR</h3>
+                    <p style="font-size: 12px; color: #bdc3c7;">High HP & Defense</p>
+                </div>
+                <div class="character class-card" onclick="selectClass('Mage')">
+                    <span class="sprite">🪄</span>
+                    <h3>MAGE</h3>
+                    <p style="font-size: 12px; color: #bdc3c7;">Huge Mana & Spells</p>
+                </div>
+                <div class="character class-card" onclick="selectClass('Rogue')">
+                    <span class="sprite">🗡️</span>
+                    <h3>ROGUE</h3>
+                    <p style="font-size: 12px; color: #bdc3c7;">High Crits & Speed</p>
+                </div>
+            </div>
+            <button onclick="location.reload()" style="margin-top: 20px; background: #7f8c8d;">BACK</button>
+        </div>
+    </div>
+
     <div id="battle-screen" class="hidden">
       <div class="battle-arena">
         <div class="character" id="player-card">
           <div class="level-badge" id="player-rank">RANK: NOVICE</div>
           <span class="sprite" id="player-visual">🛡️</span>
-          <h3>HERO</h3>
-          <div class="hp-bar-container">
-            <div id="player-hp-bar" class="hp-fill"></div>
-          </div>
+          <h3 id="player-title">HERO</h3>
+          <div class="hp-bar-container"><div id="player-hp-bar" class="hp-fill"></div></div>
           <p id="player-hp-text">100 / 100 HP</p>
           <div class="hp-bar-container" style="margin-top: 5px">
-            <div
-              id="player-mana-bar"
-              class="hp-fill"
-              style="background: #3498db; width: 100%"
-            ></div>
+            <div id="player-mana-bar" class="hp-fill" style="background: #3498db; width: 100%"></div>
           </div>
           <p id="player-mana-text">15 / 15 MP</p>
         </div>
         <div class="character" id="enemy-card">
           <span class="sprite" id="enemy-visual">👹</span>
           <h3 id="enemy-name">GOBLIN</h3>
-          <div class="hp-bar-container">
-            <div id="enemy-hp-bar" class="hp-fill"></div>
-          </div>
+          <div class="hp-bar-container"><div id="enemy-hp-bar" class="hp-fill"></div></div>
           <p id="enemy-hp-text">80 / 80 HP</p>
         </div>
       </div>
       <div class="log" id="battle-log">Welcome to the Arena!</div>
       <div class="controls">
-        <button id="attack-btn" onclick="handleTurn('attack')">
-          ⚔️ ATTACK
-        </button>
-        <button
-          id="spell-btn"
-          onclick="openSpellMenu()"
-          style="background: #8e44ad"
-        >
-          ✨ MAGIC
-        </button>
-        <button
-          id="heal-btn"
-          onclick="handleTurn('heal')"
-          style="background: #3498db"
-        >
-          💖 HEAL
-        </button>
-        <button
-          id="block-btn"
-          onclick="handleTurn('block')"
-          style="background: #f39c12"
-        >
-          🛡️ BLOCK
-        </button>
+        <button id="attack-btn" onclick="handleTurn('attack')">⚔️ ATTACK</button>
+        <button id="spell-btn" onclick="openSpellMenu()" style="background: #8e44ad">✨ MAGIC</button>
+        <button id="heal-btn" onclick="handleTurn('heal')" style="background: #3498db">💖 HEAL</button>
+        <button id="block-btn" onclick="handleTurn('block')" style="background: #f39c12">🛡️ BLOCK</button>
       </div>
     </div>
 
-    <!-- spell selection overlay -->
-    <div
-      id="spell-screen"
-      class="hidden"
-      style="
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        top: 0;
-        left: 0;
-        background: rgba(0, 0, 0, 0.8);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10;
-      "
-    >
+    <div id="spell-screen" class="hidden" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 10;">
       <div class="menu-container" style="width: 300px">
         <h2 style="color: #8e44ad; margin-top: 0">SPELL BOOK</h2>
         <div id="spell-list"></div>
-        <button
-          onclick="closeSpellMenu()"
-          style="margin-top: 20px; background: #e74c3c"
-        >
-          CANCEL
-        </button>
+        <button onclick="closeSpellMenu()" style="margin-top: 20px; background: #e74c3c">CANCEL</button>
       </div>
     </div>
 
     <div id="weapon-screen" class="hidden">
       <div class="menu-container" style="border-color: #3498db">
         <h1 style="color: #3498db">ARMORY</h1>
-        <p>Choose your new weapon:</p>
-        <button
-          onclick="equipWeapon('dagger', 0)"
-          style="background: #7f8c8d; width: 90%"
-        >
-          🗡️ Dagger (1.2x) FREE
-        </button>
-        <button
-          onclick="equipWeapon('sword', 30)"
-          style="background: #2980b9; width: 90%"
-        >
-          ⚔️ Sword (1.8x) - 30G
-        </button>
-        <button
-          onclick="equipWeapon('wand', 75)"
-          style="background: #8e44ad; width: 90%"
-        >
-          🪄 Wand (Chaos) - 75G
-        </button>
+        <p>Upgrade your <span id="weapon-class-name">Weapon</span>:</p>
+        <div id="weapon-upgrade-list"></div>
+        <button onclick="closeArmory()" style="margin-top: 10px; background: white; color: black; width: 90%;">SKIP</button>
       </div>
     </div>
 
     <div id="shop-screen" class="hidden">
       <div class="menu-container">
         <h1 style="color: gold">VICTORY</h1>
-        <p>Gold: <b id="gold-count" style="color: #f1c40f">0</b></p>
-        <div
-          style="
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            align-items: center;
-          "
-        >
-          <button
-            onclick="buyUpgrade('attack')"
-            style="background: #d35400; width: 90%"
-          >
-            💪 Attack (+5) - 10G
-          </button>
-          <button
-            onclick="buyUpgrade('hp')"
-            style="background: #27ae60; width: 90%"
-          >
-            🩹 Heal & Max HP - 15G
-          </button>
-          <button
-            onclick="buyUpgrade('mana')"
-            style="background: #2980b9; width: 90%"
-          >
-            ✨ +5 Max Mana - 20G
-          </button>
-          <button
-            onclick="saveGame()"
-            style="background: #f1c40f; color: black; width: 90%"
-          >
-            💾 SAVE PROGRESS
-          </button>
-          <button
-            onclick="nextRound()"
-            style="background: white; color: black; font-size: 20px; width: 90%"
-          >
-            NEXT FOE ➔
-          </button>
+        <p>Gold: <b class="gold-count-display" style="color: #f1c40f">0</b></p>
+        <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
+          <button onclick="buyUpgrade('attack')" style="background: #d35400; width: 90%">💪 Strength (+5) - 10G</button>
+          <button onclick="buyUpgrade('hp')" style="background: #27ae60; width: 90%">🩹 Vitality (Heal & Max HP) - 15G</button>
+          <div id="special-upgrade-container" style="width: 100%"></div>
+          <button onclick="nextRound()" style="background: white; color: black; font-size: 20px; width: 90%; margin-top: 15px;">NEXT FOE ➔</button>
         </div>
       </div>
     </div>
 
     <div id="game-over-screen" class="hidden">
-      <div
-        class="menu-container"
-        style="border-color: #e74c3c; background: #2c0000; width: 450px"
-      >
+      <div class="menu-container" style="border-color: #e74c3c; background: #2c0000; width: 450px">
         <h1 style="color: #ff4757">YOU DIED</h1>
         <p>Final Kills: <b class="kills-val">0</b></p>
-
         <div id="name-input-section">
-          <input
-            type="text"
-            id="player-name-input"
-            placeholder="ENTER YOUR NAME"
-            maxlength="10"
-          />
+          <input type="text" id="player-name-input" placeholder="ENTER YOUR NAME" maxlength="10" />
           <br />
-          <button onclick="submitScore()" style="background: #2ecc71">
-            SAVE SCORE
-          </button>
+          <button onclick="submitScore()" style="background: #2ecc71">SAVE SCORE</button>
         </div>
-
         <div class="leaderboard">
           <h3 style="margin-top: 0; color: gold">🏆 HALL OF FAME</h3>
           <div id="leaderboard-list"></div>
         </div>
-
         <br />
-        <button
-          onclick="resetGame()"
-          style="background: white; color: black; padding: 10px 20px"
-        >
-          RESTART
-        </button>
+        <button onclick="resetGame()" style="background: white; color: black; padding: 10px 20px">RESTART</button>
       </div>
     </div>
 
     <script>
-      // --- Game Config ---
-      let player = {
-        hp: 100,
-        maxHp: 100,
-        attack: 15,
-        gold: 0,
-        weapon: "fists",
-        kills: 0,
-        level: 1,
-        critChance: 0.15,
-        blocking: false,
-        mana: 15,
-        maxMana: 15,
-      };
-      let enemy = {
-        name: "Goblin",
-        sprite: "👹",
-        hp: 80,
-        maxHp: 80,
-        attack: 12,
-        blocking: false,
-      };
+      // --- Game State ---
+      let difficulty = "Normal";
+      let player = {};
+      let enemy = { name: "Goblin", sprite: "👹", hp: 80, maxHp: 80, attack: 12, blocking: false };
       let isPlayerTurn = true;
       let round = 1;
+      let weaponTier = 0;
+
+      const classConfigs = {
+          Warrior: { hp: 130, mp: 10, atk: 18, crit: 0.1, sprite: "🛡️", weapon: "Broadsword" },
+          Mage: { hp: 80, mp: 40, atk: 10, crit: 0.05, sprite: "🪄", weapon: "Staff" },
+          Rogue: { hp: 100, mp: 15, atk: 14, crit: 0.25, sprite: "🗡️", weapon: "Daggers" }
+      };
+
+      const weaponTrees = {
+          Warrior: [
+              { name: "Steel Blade", mult: 1.4, price: 30 },
+              { name: "Giant Slayer", mult: 2.0, price: 70 },
+              { name: "Dragon Blade", mult: 3.0, price: 150 }
+          ],
+          Mage: [
+              { name: "Crystal Wand", mult: 1.5, price: 35 },
+              { name: "Arcane Staff", mult: 2.2, price: 75 },
+              { name: "Void Scepter", mult: 3.5, price: 160 }
+          ],
+          Rogue: [
+              { name: "Poison Daggers", mult: 1.6, price: 30 },
+              { name: "Shadow Dirk", mult: 2.4, price: 80 },
+              { name: "Nightfall", mult: 3.2, price: 140 }
+          ]
+      };
 
       const ranks = [
-        { k: 0, n: "NOVICE" },
-        { k: 3, n: "WARRIOR", b: "Crit Chance Up!" },
-        { k: 10, n: "SLAYER", b: "Attack Boost!" },
-        { k: 25, n: "ELITE", b: "Crit Chance Max!" },
-        { k: 50, n: "LEGEND", b: "God Mode Enabled?" },
+        { k: 0, n: "NOVICE" }, { k: 3, n: "WARRIOR" }, { k: 10, n: "SLAYER" }, { k: 25, n: "ELITE" }, { k: 50, n: "LEGEND" },
       ];
 
       const monsters = [
@@ -479,141 +367,93 @@
         { name: "Orc", sprite: "🧌", hM: 1.5, aM: 1.3 },
       ];
 
-      // spell definitions
-      const spells = [
-        { id: "fire", name: "Fireball", cost: 5, dmgMin: 20, dmgMax: 30 },
-        { id: "ice", name: "Ice Shard", cost: 8, dmgMin: 15, dmgMax: 40 },
-        {
-          id: "lightning",
-          name: "Lightning",
-          cost: 12,
-          dmgMin: 30,
-          dmgMax: 50,
-        },
+      const spellCatalog = [
+        { id: "fire", name: "Fireball", cost: 5, dmgMin: 20, dmgMax: 30, price: 0, icon: "🔥" },
+        { id: "ice", name: "Ice Shard", cost: 8, dmgMin: 25, dmgMax: 45, price: 40, icon: "❄️" },
+        { id: "lightning", name: "Lightning", cost: 12, dmgMin: 40, dmgMax: 60, price: 65, icon: "⚡" },
+        { id: "drain", name: "Life Drain", cost: 15, dmgMin: 20, dmgMax: 35, price: 90, icon: "🧛" }
       ];
 
-      // spell/menu logic
-      function openSpellMenu() {
-        if (player.weapon !== "wand") return;
-        toggleBtns(false);
-        const list = document.getElementById("spell-list");
-        list.innerHTML = spells
-          .map((s) => {
-            const affordable = player.mana >= s.cost;
-            return `<button onclick="castSpell('${s.id}')" style="width:100%; margin:5px 0; background:${affordable ? "#8e44ad" : "#555"}" ${!affordable ? "disabled" : ""}>
-                    ${s.name} (${s.cost}MP)
-                  </button>`;
-          })
-          .join("");
-        document.getElementById("spell-screen").classList.remove("hidden");
-      }
-      function closeSpellMenu() {
-        document.getElementById("spell-screen").classList.add("hidden");
-        if (isPlayerTurn) toggleBtns(true);
-      }
-      function castSpell(id) {
-        const spell = spells.find((s) => s.id === id);
-        if (!spell) return;
-        if (player.mana < spell.cost) return;
-        player.mana -= spell.cost;
-        const dmg = Math.floor(
-          spell.dmgMin + Math.random() * (spell.dmgMax - spell.dmgMin),
-        );
-        logMessage(`✨ ${spell.name} deals ${dmg} damage!`);
-        playSfx(1000, "sawtooth", 0.2);
-        enemy.hp = Math.max(0, enemy.hp - dmg);
-        updateUI();
-        closeSpellMenu();
-        // after casting, enemy turn begins
-        if (enemy.hp <= 0) {
-          player.kills++;
-          checkLevelUp();
-          setTimeout(goToShop, 800);
-        } else {
-          isPlayerTurn = false;
-          setTimeout(enemyTurn, 1000);
-        }
+      // --- Initialization ---
+      function setDifficulty(lvl) {
+          difficulty = lvl;
+          document.getElementById("btn-easy").style.border = lvl === "Easy" ? "2px solid white" : "none";
+          document.getElementById("btn-normal").style.border = lvl === "Normal" ? "2px solid white" : "none";
+          document.getElementById("btn-hard").style.border = lvl === "Hard" ? "2px solid white" : "none";
+          document.getElementById("diff-display").innerText = lvl.toUpperCase();
       }
 
-      // --- Audio ---
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      function playSfx(f, type = "sine", d = 0.1, v = 0.1) {
-        if (audioCtx.state === "suspended") audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(f, audioCtx.currentTime);
-        g.gain.setValueAtTime(v, audioCtx.currentTime);
-        g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + d);
-        osc.connect(g);
-        g.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + d);
+      function showClassPicker() {
+          document.getElementById("home-screen").classList.add("hidden");
+          document.getElementById("class-screen").classList.remove("hidden");
       }
 
-      // --- Core Logic ---
-      function startGame() {
-        playSfx(440, "sine", 0.2);
-        document.getElementById("home-screen").classList.add("hidden");
-        document.getElementById("battle-screen").classList.remove("hidden");
-        loadGame();
-        updateUI();
+      function selectClass(c) {
+          const config = classConfigs[c];
+          player = {
+              class: c,
+              hp: config.hp, maxHp: config.hp,
+              mana: config.mp, maxMana: config.mp,
+              attack: config.atk,
+              critChance: config.crit,
+              gold: difficulty === "Easy" ? 50 : 0,
+              kills: 0, level: 1, blocking: false,
+              weaponName: config.weapon,
+              weaponMult: 1.0,
+              spells: c === "Mage" ? ["fire", "ice"] : ["fire"],
+              upgradesBought: 0
+          };
+          
+          document.getElementById("player-title").innerText = c.toUpperCase();
+          document.getElementById("player-visual").innerText = config.sprite;
+          document.getElementById("class-screen").classList.add("hidden");
+          document.getElementById("battle-screen").classList.remove("hidden");
+          
+          updateUI();
+          setupSpecialUpgrade();
       }
 
-      function checkLevelUp() {
-        const nextRank = ranks.find((r) => r.k === player.kills);
-        if (nextRank && player.kills > 0) {
-          player.level++;
-          if (nextRank.n === "WARRIOR") player.critChance = 0.25;
-          if (nextRank.n === "SLAYER") player.attack += 10;
-          if (nextRank.n === "ELITE") player.critChance = 0.4;
-          logMessage(
-            `<b style="color:#f1c40f">LEVEL UP! REACHED ${nextRank.n} RANK!</b>`,
-          );
-          playSfx(800, "sine", 0.5, 0.2);
-        }
+      function setupSpecialUpgrade() {
+          const container = document.getElementById("special-upgrade-container");
+          let html = "";
+          if (player.class === "Warrior") html = `<button onclick="buySpecial('hp')" style="background: #8e44ad; width: 90%">🛡️ Armor Polish (+15 HP) - 20G</button>`;
+          if (player.class === "Mage") html = `<button onclick="buySpecial('mana')" style="background: #8e44ad; width: 90%">🧪 Focus (+15 Mana) - 20G</button>`;
+          if (player.class === "Rogue") html = `<button onclick="buySpecial('crit')" style="background: #8e44ad; width: 90%">🎯 Sharpen (+5% Crit) - 20G</button>`;
+          container.innerHTML = html;
       }
 
+      function buySpecial(type) {
+          if (player.gold >= 20) {
+              player.gold -= 20;
+              if (type === "hp") player.maxHp += 15;
+              if (type === "mana") player.maxMana += 15;
+              if (type === "crit") player.critChance += 0.05;
+              playSfx(800);
+              updateUI();
+          }
+      }
+
+      // --- Battle Core ---
       function handleTurn(action) {
         if (!isPlayerTurn || player.hp <= 0) return;
         toggleBtns(false);
 
         if (action === "attack") {
-          let m =
-            player.weapon === "dagger"
-              ? 1.2
-              : player.weapon === "sword"
-                ? 1.8
-                : player.weapon === "wand"
-                  ? Math.random() * 2.5 + 0.5
-                  : 1;
           let isCrit = Math.random() < player.critChance;
-          let dmg = Math.floor(player.attack * (0.8 + Math.random() * 0.4) * m);
-
-          if (enemy.blocking) {
-            dmg = Math.floor(dmg * 0.5);
-            logMessage(`<i>Enemy blocks!</i>`);
-            enemy.blocking = false;
-          }
-          if (isCrit) {
-            dmg *= 2;
-            logMessage(`<b style="color:orange">CRIT! ${dmg} DMG!</b>`);
-            playSfx(1200, "sine", 0.2);
-            animate("enemy-card", true);
-          } else {
-            logMessage(`You deal ${dmg} dmg.`);
-            playSfx(150, "sawtooth");
-            animate("enemy-card", false);
-          }
+          let dmg = Math.floor(player.attack * (0.8 + Math.random() * 0.4) * player.weaponMult);
+          if (enemy.blocking) { dmg = Math.floor(dmg * 0.5); enemy.blocking = false; }
+          if (isCrit) { dmg *= 2; logMessage(`<b style="color:orange">CRIT! ${dmg} DMG!</b>`); animate("enemy-card", true); } 
+          else { logMessage(`You strike for ${dmg} dmg.`); animate("enemy-card", false); }
           enemy.hp = Math.max(0, enemy.hp - dmg);
+          playSfx(150, "sawtooth");
         } else if (action === "heal") {
           player.hp = Math.min(player.maxHp, player.hp + 25);
-          logMessage("Healed!");
+          logMessage("Healed for 25 HP!");
           playSfx(500);
         } else if (action === "block") {
           player.blocking = true;
-          logMessage("You brace for the enemy's attack!");
-          playSfx(300, "triangle", 0.2);
+          logMessage("Bracing for impact!");
+          playSfx(300, "triangle");
         }
 
         updateUI();
@@ -628,206 +468,119 @@
       }
 
       function enemyTurn() {
-        // close spell menu if somehow open
-        document.getElementById("spell-screen").classList.add("hidden");
         if (player.hp <= 0) return;
-
-        // decide whether to heal, block or attack
-        const lowThreshold = enemy.maxHp * 0.3;
-        let action;
-
-        if (enemy.hp > 0 && enemy.hp < lowThreshold && Math.random() < 0.4) {
-          action = "heal";
-        } else if (Math.random() < 0.3) {
-          action = "block";
-        } else {
-          action = "attack";
-        }
-
-        if (action === "heal") {
-          const healAmt = Math.floor(enemy.maxHp * 0.2);
-          enemy.hp = Math.min(enemy.maxHp, enemy.hp + healAmt);
-          logMessage(`${enemy.name} heals for ${healAmt}!`);
-          playSfx(700, "triangle", 0.3);
-          updateUI();
-          isPlayerTurn = true;
-          toggleBtns(true);
-          return;
-        }
-
-        if (action === "block") {
-          enemy.blocking = true;
-          logMessage(`${enemy.name} is blocking!`);
-          playSfx(300, "triangle", 0.2);
-          isPlayerTurn = true;
-          toggleBtns(true);
-          return;
-        }
-
-        // regular attack
         let dmg = Math.floor(enemy.attack * (0.8 + Math.random() * 0.4));
-        if (player.blocking) {
-          dmg = Math.floor(dmg * 0.5);
-          logMessage("Your block absorbs some damage!");
-          player.blocking = false;
-        }
+        if (player.blocking) { dmg = Math.floor(dmg * 0.5); player.blocking = false; }
         player.hp = Math.max(0, player.hp - dmg);
         logMessage(`${enemy.name} hits for ${dmg}.`);
         playSfx(100, "square", 0.15, 0.2);
         animate("player-card", false);
         updateUI();
         if (player.hp <= 0) setTimeout(showGameOver, 500);
-        else {
-          isPlayerTurn = true;
-          toggleBtns(true);
-        }
+        else { isPlayerTurn = true; toggleBtns(true); }
       }
 
-      // --- Leaderboard Logic ---
-      function submitScore() {
-        const nameInput = document.getElementById("player-name-input");
-        const name = nameInput.value.trim().toUpperCase() || "ANONYMOUS";
-        let scores = JSON.parse(localStorage.getItem("rpg_leaderboard")) || [];
-        scores.push({ name: name, kills: player.kills });
-        scores.sort((a, b) => b.kills - a.kills);
-        scores = scores.slice(0, 5);
-        localStorage.setItem("rpg_leaderboard", JSON.stringify(scores));
-        document.getElementById("name-input-section").classList.add("hidden");
-        displayLeaderboard();
-      }
-
-      function displayLeaderboard() {
-        const scores =
-          JSON.parse(localStorage.getItem("rpg_leaderboard")) || [];
-        const scoreHTML =
-          scores.length === 0
-            ? "<div style='color: #888;'>No legends yet...</div>"
-            : scores
-                .map(
-                  (entry, index) => `
-                    <div class="leaderboard-entry">
-                        <span>${index + 1}. ${entry.name}</span>
-                        <span style="color: #ff4757;">${entry.kills} KILLS</span>
-                    </div>`,
-                )
-                .join("");
-
-        if (document.getElementById("home-leaderboard-list"))
-          document.getElementById("home-leaderboard-list").innerHTML =
-            scoreHTML;
-        if (document.getElementById("leaderboard-list"))
-          document.getElementById("leaderboard-list").innerHTML = scoreHTML;
-      }
-
-      // --- Navigation & UI ---
-      function updateUI() {
-        document.getElementById("player-hp-bar").style.width =
-          (player.hp / player.maxHp) * 100 + "%";
-        document.getElementById("player-hp-text").innerText =
-          `${Math.floor(player.hp)}/${player.maxHp} HP`;
-        document.getElementById("player-mana-bar").style.width =
-          (player.mana / player.maxMana) * 100 + "%";
-        document.getElementById("player-mana-text").innerText =
-          `${Math.floor(player.mana)}/${player.maxMana} MP`;
-        document.getElementById("enemy-hp-bar").style.width =
-          (enemy.hp / enemy.maxHp) * 100 + "%";
-        document.getElementById("enemy-hp-text").innerText =
-          `${Math.floor(enemy.hp)}/${Math.floor(enemy.maxHp)} HP`;
-        document.getElementById("enemy-name").innerText = enemy.name;
-        document.getElementById("enemy-visual").innerText = enemy.sprite;
-        document.getElementById("gold-count").innerText = player.gold;
-        document
-          .querySelectorAll(".kills-val")
-          .forEach((el) => (el.innerText = player.kills));
-        const currentRank = [...ranks]
-          .reverse()
-          .find((r) => player.kills >= r.k);
-        document.getElementById("player-rank").innerText =
-          `RANK: ${currentRank.n}`;
-
-        // disable spell button if no wand or insufficient mana
-        const spellBtn = document.getElementById("spell-btn");
-        if (spellBtn) {
-          const minCost = Math.min(...spells.map((s) => s.cost));
-          spellBtn.disabled =
-            !isPlayerTurn || player.weapon !== "wand" || player.mana < minCost;
-        }
-      }
-
+      // --- Shop & Progression ---
       function goToShop() {
-        player.gold += 10 + round * 5;
-        playSfx(600, "sine", 0.5);
+        let goldGain = (10 + round * 5);
+        if (difficulty === "Easy") goldGain *= 1.5;
+        if (difficulty === "Hard") goldGain *= 0.8;
+        player.gold += Math.floor(goldGain);
+        
         document.getElementById("battle-screen").classList.add("hidden");
-        if (round % 3 === 0)
-          document.getElementById("weapon-screen").classList.remove("hidden");
-        else document.getElementById("shop-screen").classList.remove("hidden");
+        if (round % 3 === 0) {
+            renderArmory();
+            document.getElementById("weapon-screen").classList.remove("hidden");
+        } else {
+            document.getElementById("shop-screen").classList.remove("hidden");
+        }
         updateUI();
       }
 
+      function renderArmory() {
+          const list = document.getElementById("weapon-upgrade-list");
+          const tree = weaponTrees[player.class];
+          document.getElementById("weapon-class-name").innerText = player.class + "'s " + player.weaponName;
+          
+          list.innerHTML = tree.map((w, i) => {
+              const owned = weaponTier > i;
+              const current = weaponTier === i;
+              return `<button onclick="upgradeWeapon(${i}, ${w.price}, ${w.mult})" 
+                      style="width: 90%; background: ${owned ? '#555' : (current ? '#2980b9' : '#333')}" 
+                      ${owned || !current || player.gold < w.price ? 'disabled' : ''}>
+                      ${owned ? '✅ ' : ''}${w.name} (${w.mult}x) - ${w.price}G
+                      </button>`;
+          }).join("");
+      }
+
+      function upgradeWeapon(tier, price, mult) {
+          player.gold -= price;
+          player.weaponMult = mult;
+          weaponTier++;
+          playSfx(1000);
+          closeArmory();
+      }
+
+      function closeArmory() {
+          document.getElementById("weapon-screen").classList.add("hidden");
+          document.getElementById("shop-screen").classList.remove("hidden");
+      }
+
       function nextRound() {
-        // ensure menu is closed
-        document.getElementById("spell-screen").classList.add("hidden");
-        round++;
         document.getElementById("shop-screen").classList.add("hidden");
-        document.getElementById("battle-screen").classList.remove("hidden");
+        round++;
         const m = monsters[Math.floor(Math.random() * monsters.length)];
+        const diffScale = difficulty === "Hard" ? 1.3 : (difficulty === "Easy" ? 0.8 : 1.0);
+        
         enemy = {
-          name: round % 7 === 0 ? "BOSS DRAGON" : m.name,
-          sprite: round % 7 === 0 ? "🐉" : m.sprite,
-          hp: (80 + round * 7) * (round % 7 === 0 ? 3 : m.hM),
-          maxHp: (80 + round * 7) * (round % 7 === 0 ? 3 : m.hM),
-          attack: (10 + round * 2) * (round % 7 === 0 ? 2 : m.aM),
+          name: m.name, sprite: m.sprite,
+          hp: Math.floor((80 + round * 12) * m.hM * diffScale),
+          maxHp: Math.floor((80 + round * 12) * m.hM * diffScale),
+          attack: Math.floor((10 + round * 2) * m.aM * diffScale),
+          blocking: false
         };
+        
+        document.getElementById("battle-screen").classList.remove("hidden");
+        player.mana = player.maxMana;
         isPlayerTurn = true;
-        player.mana = player.maxMana; // refill mana at start of each fight
         toggleBtns(true);
         updateUI();
       }
 
       function buyUpgrade(t) {
-        if (t === "attack" && player.gold >= 10) {
-          player.gold -= 10;
-          player.attack += 5;
-          playSfx(800);
-        } else if (t === "hp" && player.gold >= 15) {
-          player.gold -= 15;
-          player.maxHp += 20;
-          player.hp = player.maxHp;
-          playSfx(800);
-        } else if (t === "mana" && player.gold >= 20 && player.maxMana < 100) {
-          player.gold -= 20;
-          player.maxMana = Math.min(100, player.maxMana + 5);
-          player.mana = player.maxMana;
-          playSfx(800);
-        }
+        if (t === "attack" && player.gold >= 10) { player.gold -= 10; player.attack += 5; playSfx(800); } 
+        else if (t === "hp" && player.gold >= 15) { player.gold -= 15; player.maxHp += 20; player.hp = player.maxHp; playSfx(800); }
         updateUI();
       }
 
-      function showGameOver() {
-        playSfx(50, "sawtooth", 1.0, 0.3);
-        document.getElementById("battle-screen").classList.add("hidden");
-        document.getElementById("game-over-screen").classList.remove("hidden");
-        displayLeaderboard();
-        updateUI();
+      // --- Utility & UI ---
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      function playSfx(f, type = "sine", d = 0.1, v = 0.1) {
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.setValueAtTime(v, audioCtx.currentTime);
+        g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + d);
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + d);
       }
 
-      function equipWeapon(type, cost) {
-        if (player.gold >= cost) {
-          player.gold -= cost;
-          player.weapon = type;
-          updateWeaponVisual();
-          document.getElementById("weapon-screen").classList.add("hidden");
-          document.getElementById("shop-screen").classList.remove("hidden");
-          updateUI();
-        }
-      }
-
-      function toggleBtns(on) {
-        document.getElementById("attack-btn").disabled = !on;
-        document.getElementById("heal-btn").disabled = !on;
-        document.getElementById("block-btn").disabled = !on;
-        const spellBtn = document.getElementById("spell-btn");
-        if (spellBtn) spellBtn.disabled = !on;
+      function updateUI() {
+        document.getElementById("player-hp-bar").style.width = (player.hp / player.maxHp) * 100 + "%";
+        document.getElementById("player-hp-text").innerText = `${Math.floor(player.hp)}/${player.maxHp} HP`;
+        document.getElementById("player-mana-bar").style.width = (player.mana / player.maxMana) * 100 + "%";
+        document.getElementById("player-mana-text").innerText = `${Math.floor(player.mana)}/${player.maxMana} MP`;
+        document.getElementById("enemy-hp-bar").style.width = (enemy.hp / enemy.maxHp) * 100 + "%";
+        document.getElementById("enemy-hp-text").innerText = `${Math.floor(enemy.hp)}/${Math.floor(enemy.maxHp)} HP`;
+        document.getElementById("enemy-name").innerText = enemy.name;
+        document.getElementById("enemy-visual").innerText = enemy.sprite;
+        document.querySelectorAll(".gold-count-display").forEach(el => el.innerText = player.gold);
+        document.querySelectorAll(".kills-val").forEach(el => el.innerText = player.kills);
+        const currentRank = [...ranks].reverse().find(r => player.kills >= r.k);
+        document.getElementById("player-rank").innerText = `RANK: ${currentRank.n}`;
+        document.getElementById("spell-btn").disabled = player.mana < 5;
       }
 
       function logMessage(msg) {
@@ -843,38 +596,76 @@
         setTimeout(() => el.classList.remove(cn), 400);
       }
 
-      function saveGame() {
-        localStorage.setItem(
-          "rpg_save_final",
-          JSON.stringify({ player, round }),
-        );
-        logMessage("Save Complete.");
+      function toggleBtns(on) {
+        document.getElementById("attack-btn").disabled = !on;
+        document.getElementById("heal-btn").disabled = !on;
+        document.getElementById("block-btn").disabled = !on;
+        document.getElementById("spell-btn").disabled = !on || player.mana < 5;
       }
 
-      function loadGame() {
-        const s = localStorage.getItem("rpg_save_final");
-        if (s) {
-          const d = JSON.parse(s);
-          player = d.player;
-          round = d.round;
-          updateWeaponVisual();
+      function openSpellMenu() {
+        toggleBtns(false);
+        const list = document.getElementById("spell-list");
+        list.innerHTML = player.spells.map(spellId => {
+          const s = spellCatalog.find(c => c.id === spellId);
+          return `<button onclick="castSpell('${s.id}')" style="width:100%; background:#8e44ad" ${player.mana < s.cost ? 'disabled' : ''}>
+                    ${s.icon} ${s.name} (${s.cost}MP)
+                  </button>`;
+        }).join("");
+        document.getElementById("spell-screen").classList.remove("hidden");
+      }
+
+      function closeSpellMenu() {
+        document.getElementById("spell-screen").classList.add("hidden");
+        toggleBtns(true);
+      }
+
+      function castSpell(id) {
+        const spell = spellCatalog.find(s => s.id === id);
+        player.mana -= spell.cost;
+        let dmg = Math.floor(spell.dmgMin + Math.random() * (spell.dmgMax - spell.dmgMin));
+        logMessage(`✨ You cast ${spell.name} for ${dmg} dmg!`);
+        enemy.hp = Math.max(0, enemy.hp - dmg);
+        updateUI();
+        closeSpellMenu();
+        if (enemy.hp <= 0) { player.kills++; checkLevelUp(); setTimeout(goToShop, 800); } 
+        else { isPlayerTurn = false; setTimeout(enemyTurn, 1000); }
+      }
+
+      function checkLevelUp() {
+        const nextRank = ranks.find(r => r.k === player.kills);
+        if (nextRank && player.kills > 0) {
+          player.level++;
+          logMessage(`<b style="color:#f1c40f">RANK UP: ${nextRank.n}!</b>`);
+          playSfx(800, "sine", 0.5, 0.2);
         }
       }
 
-      function resetGame() {
-        localStorage.removeItem("rpg_save_final");
-        location.reload();
-      }
-      function updateWeaponVisual() {
-        document.getElementById("player-visual").innerText = {
-          fists: "🛡️",
-          dagger: "🗡️",
-          sword: "⚔️",
-          wand: "🪄",
-        }[player.weapon];
+      function showGameOver() {
+        document.getElementById("battle-screen").classList.add("hidden");
+        document.getElementById("game-over-screen").classList.remove("hidden");
+        displayLeaderboard();
       }
 
-      // Initialize
+      function submitScore() {
+        const name = document.getElementById("player-name-input").value.trim().toUpperCase() || "ANON";
+        let scores = JSON.parse(localStorage.getItem("rpg_leaderboard")) || [];
+        scores.push({ name: name, kills: player.kills });
+        scores.sort((a, b) => b.kills - a.kills);
+        localStorage.setItem("rpg_leaderboard", JSON.stringify(scores.slice(0, 5)));
+        document.getElementById("name-input-section").classList.add("hidden");
+        displayLeaderboard();
+      }
+
+      function displayLeaderboard() {
+        const scores = JSON.parse(localStorage.getItem("rpg_leaderboard")) || [];
+        const html = scores.map((e, i) => `<div class="leaderboard-entry"><span>${i+1}. ${e.name}</span><span style="color:#ff4757;">${e.kills} KILLS</span></div>`).join("");
+        document.getElementById("home-leaderboard-list").innerHTML = html;
+        document.getElementById("leaderboard-list").innerHTML = html;
+      }
+
+      function resetGame() { location.reload(); }
+
       displayLeaderboard();
     </script>
   </body>
