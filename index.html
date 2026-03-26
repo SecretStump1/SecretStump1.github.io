@@ -2,45 +2,67 @@
 <html>
   <head>
     <title> Sub To My Youtube </title>
-   <link rel="stylesheet" href="style.css" /> 
+    <link rel="stylesheet" href="style.css" /> 
+    <style>
+      /* Added some basic styling to ensure the video fits well */
+      .video-container {
+        margin-top: 20px;
+        text-align: center;
+      }
+      iframe {
+        max-width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+    </style>
   </head>
 
   <body>
-    <!-- All content goes here -->
     <div id="all-contents">
       <nav>
         <h1>Sub To My Youtube</h1>
         <ul id="nav-ul">
-          </li>
           <li class="nav-li">
             <a href="portfolio.html">Portfolio</a>
-           <li class="nav-li">
+          </li>
+          <li class="nav-li">
             <a href="IMAGES.html">Image Gallery</a>
-          
           </li>
         </ul>
       </nav>
 
       <main>
-        
         <div class="sidebar">
           <img class="sidebar-img" src="https://yt3.ggpht.com/4JWFTVm_YeX7RmHxnzEMLaLPnvvfc-bew4Lu1kVneuByMWir1bY1JDb_9HST_VeYde8aiKPqug=s176-c-k-c0x00ffffff-no-rj-mo">
         </div>
-        
         
         <div class="content">
           <h2>Trenton Witthuhn</h2>
           <p>Student At Covington High</p>
           
           <div id="interests">
-          <h3>Interests</h3>
-          <ul>
-            <li>Making Content</li>
-            <li>Hosting minecraft Servers</li>
-            <li>Spending Time With Family</li>
-          </ul>
-         </div>
-        </div>
+            <h3>Interests</h3>
+            <ul>
+              <li>Making Content</li>
+              <li>Hosting minecraft Servers</li>
+              <li>Spending Time With Family</li>
+            </ul>
+          </div>
+
+          <div class="video-container">
+            <h3>Featured Video</h3>
+            <iframe 
+              width="560" 
+              height="315" 
+              src="https://www.youtube.com/embed/svofsKRsCaE" 
+              title="YouTube video player" 
+              frameborder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+              referrerpolicy="strict-origin-when-cross-origin" 
+              allowfullscreen>
+            </iframe>
+          </div>
+          </div>
       </main>
     </div>
   </body>
