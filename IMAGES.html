@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Purple Slideshow</title>
+    <style>
+        body {
+            background-color: #1a0b2e; /* Deep Dark Purple */
+            color: #e0d4f7;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .slideshow-container {
+            position: relative;
+            max-width: 800px;
+            width: 90%;
+            height: 500px;
+            background: #2d1b4d; /* Slightly lighter purple for the frame */
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 2px solid #4b2c85;
+        }
+
+        .slideshow-container img {
+            max-width: 100%;
+            max-height: 100%;
+            display: none; /* Hide all images initially */
+            object-fit: contain;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .slideshow-container img.active {
+            display: block; /* Only show the active image */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: #6a3ab2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #8a5ad4;
+        }
+
+        .caption {
+            margin-top: 10px;
+            font-style: italic;
+            color: #b39ddb;
+        }
+    </style>
+
+</head>
+<body>
+<div id="all-contents">
+      <nav>
+        <h1>Sub To My Youtube</h1>
+        <ul id="nav-ul">
+          <li class="nav-li">
+            <a href="index.html">Home</a>
+          </li>
+          <li class="nav-li">
+            <a href="portfolio.html">Portfolio</a>
+          
+          
+          </li>
+        </ul>
+      </nav>
+
+      <main>
+    <div class="slideshow-container" id="slider">
+        <img id="aLine" src="images/line.JPG" class="active" alt="A Line">
+        <img id="content" src="images/tree.JPG" alt="Tree">
+        <img id="beauty" src="images/beauty.JPG" alt="Beauty">
+        <img id="anAntsViewOfTheWorld" src="images/ant.JPG" alt="An Ant's View">
+        <img id="shape" src="images/shape.JPG" alt="Shape">
+        <img id="somthingThatRepresentsYou" src="images/me.JPG" alt="Something That Represents You">
+        <img id="texture" src="images/texture.JPG" alt="Texture">
+        <img id="aSymbol" src="images/big_flower.JPG" alt="A Big Flower">
+        <img id="theRuleOfThirds" src="images/thierd.JPG" alt="The Rule of Thirds">
+        <img id="schoolSpirit" src="images/school.JPG" alt="School Spirit">
+    <img id="schoolSpirit" src="images/67.JPG" alt="67">
+     <img id="schoolSpirit" src="images/alex.JPG" alt="Alex">
+      <img id="schoolSpirit" src="images/brid.JPG" alt="Brid">
+       <img id="schoolSpirit" src="images/exit.JPG" alt="Exit">
+        <img id="schoolSpirit" src="images/rust.JPG" alt="Rust">
+         <img id="schoolSpirit" src="images/small_flower.JPG" alt="A Small flower">
+          <img id="schoolSpirit" src="images/trash.JPG" alt="Trash">
+   
+    </div>
+
+    <div class="caption" id="captionText">A Line</div>
+
+    <div class="controls">
+        <button onclick="changeSlide(-1)">❮ Prev</button>
+        <button onclick="changeSlide(1)">Next ❯</button>
+    </div>
+
+    <script>
+        let currentIndex = 0;
+        const slides = document.querySelectorAll('.slideshow-container img');
+        const caption = document.getElementById('captionText');
+
+        function changeSlide(direction) {
+            slides[currentIndex].classList.remove('active');
+            
+            currentIndex += direction;
+
+            if (currentIndex >= slides.length) {
+                currentIndex = 0;
+            } else if (currentIndex < 0) {
+                currentIndex = slides.length - 1;
+            }
+
+            slides[currentIndex].classList.add('active');
+            caption.innerText = slides[currentIndex].alt;
+        }
+    </script>
+</body>
+</html>
